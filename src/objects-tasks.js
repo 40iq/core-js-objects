@@ -172,8 +172,44 @@ function makeWord(lettersObject) {
  *    sellTickets([25, 25, 50]) => true
  *    sellTickets([25, 100]) => false (The seller does not have enough money to give change.)
  */
-function sellTickets(/* queue */) {
-  throw new Error('Not implemented');
+function sellTickets(queue) {
+  const sellerCash = {
+    bill25: 0,
+    bill50: 0,
+    bill100: 0,
+    canSell: true,
+  };
+
+  queue.forEach((bill) => {
+    switch (bill) {
+      case 25:
+        sellerCash.bill25 += 1;
+        break;
+      case 50:
+        if (sellerCash.bill25 > 0) {
+          sellerCash.bill25 -= 1;
+          sellerCash.bill50 += 1;
+        } else {
+          sellerCash.canSell = false;
+        }
+        break;
+      case 100:
+      default:
+        if (sellerCash.bill50 > 0 && sellerCash.bill25 > 0) {
+          sellerCash.bill25 -= 1;
+          sellerCash.bill50 -= 1;
+          sellerCash.bill100 += 1;
+        } else if (sellerCash.bill25 > 2) {
+          sellerCash.bill25 -= 3;
+          sellerCash.bill100 += 1;
+        } else {
+          sellerCash.canSell = false;
+        }
+        break;
+    }
+  });
+
+  return sellerCash.canSell;
 }
 
 /**
@@ -189,8 +225,14 @@ function sellTickets(/* queue */) {
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  return {
+    width,
+    height,
+    getArea() {
+      return this.width * this.height;
+    },
+  };
 }
 
 /**
@@ -203,8 +245,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 /**
@@ -218,8 +260,8 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  return Object.setPrototypeOf(JSON.parse(json), proto);
 }
 
 /**
@@ -248,8 +290,13 @@ function fromJSON(/* proto, json */) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  return arr.sort((a, b) => {
+    if (a.country === b.country) {
+      return a.city > b.city ? 1 : -1;
+    }
+    return a.country > b.country ? 1 : -1;
+  });
 }
 
 /**
@@ -282,8 +329,20 @@ function sortCitiesArray(/* arr */) {
  *    "Poland" => ["Lodz"]
  *   }
  */
-function group(/* array, keySelector, valueSelector */) {
-  throw new Error('Not implemented');
+function group(array, keySelector, valueSelector) {
+  const countries = new Set(array.map((e) => keySelector(e)));
+
+  const result = new Map();
+
+  countries.forEach((e) => {
+    result.set(e, []);
+  });
+
+  array.forEach((obj) => {
+    result.get(keySelector(obj)).push(valueSelector(obj));
+  });
+
+  return result;
 }
 
 /**
@@ -339,35 +398,33 @@ function group(/* array, keySelector, valueSelector */) {
  *
  *  For more examples see unit tests.
  */
+// const order = {
+//   element: 0,
+//   id: 1,
+//   class: 2,
+//   attribute: 3,
+//   pseudoClass: 4,
+//   pseudoElement: 5,
+// };
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
-  },
+  /*
+  element(value) {},
 
-  id(/* value */) {
-    throw new Error('Not implemented');
-  },
+  id(value) {},
 
-  class(/* value */) {
-    throw new Error('Not implemented');
-  },
+  class(value) {},
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
-  },
+  attr(value) {},
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
-  },
+  pseudoClass(value) {},
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
-  },
+  pseudoElement(value) {},
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
-  },
+  combine(selector1, combinator, selector2) {},
+
+  stringify() {},
+  */
 };
 
 module.exports = {
