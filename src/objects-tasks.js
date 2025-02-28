@@ -398,33 +398,74 @@ function group(array, keySelector, valueSelector) {
  *
  *  For more examples see unit tests.
  */
-// const order = {
-//   element: 0,
-//   id: 1,
-//   class: 2,
-//   attribute: 3,
-//   pseudoClass: 4,
-//   pseudoElement: 5,
-// };
+const ORDER_SELECTORS = {
+  element: 0,
+  id: 1,
+  class: 2,
+  attribute: 3,
+  pseudoClass: 4,
+  pseudoElement: 5,
+};
 
 const cssSelectorBuilder = {
-  /*
-  element(value) {},
+  css: [],
+  selectors: [],
 
-  id(value) {},
+  solve(value, selector) {
+    if (this.selectors.includes(selector)) {
+      if (selector === 0 || selector === 1 || selector === 5) {
+        throw new Error(
+          'Element, id and pseudo-element should not occur more then one time inside the selector'
+        );
+      }
+    }
 
-  class(value) {},
+    if (this.selectors.some((el) => el > selector)) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
 
-  attr(value) {},
+    const newObj = Object.create(this);
 
-  pseudoClass(value) {},
+    newObj.selectors = this.selectors.concat(selector);
+    newObj.css = this.css.concat(value);
+    return newObj;
+  },
 
-  pseudoElement(value) {},
+  element(value) {
+    return this.solve(value, ORDER_SELECTORS.element);
+  },
 
-  combine(selector1, combinator, selector2) {},
+  id(value) {
+    return this.solve(`#${value}`, ORDER_SELECTORS.id);
+  },
 
-  stringify() {},
-  */
+  class(value) {
+    return this.solve(`.${value}`, ORDER_SELECTORS.class);
+  },
+
+  attr(value) {
+    return this.solve(`[${value}]`, ORDER_SELECTORS.attribute);
+  },
+
+  pseudoClass(value) {
+    return this.solve(`:${value}`, ORDER_SELECTORS.pseudoClass);
+  },
+
+  pseudoElement(value) {
+    return this.solve(`::${value}`, ORDER_SELECTORS.pseudoElement);
+  },
+
+  combine(selector1, combinator, selector2) {
+    const obj = Object.create(this);
+    obj.css = selector1.css.concat(` ${combinator} `).concat(selector2.css);
+    return obj;
+  },
+
+  stringify() {
+    return this.css.join('');
+  },
 };
 
 module.exports = {
